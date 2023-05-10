@@ -24,4 +24,5 @@ preçosCombustiveisIncremental <- (!preçosCombustiveisFinal$chavesubstituta %in
 
 preçosCombustiveisInicial[preçosCombustiveisIncremental,]
 
+#união das bases
 preçosCombustiveisCompleta <- rbind(preçosCombustiveisInicial, preçosCombustiveisInicial[preçosCombustiveisIncremental,])
