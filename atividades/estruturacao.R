@@ -17,4 +17,3 @@ mFastFoods <- goalFastFoods %>% group_by(restaurant) %>% mutate(row = row_number
 mFastFoodsnew <- mFastFoods %>% pivot_wider(names_from = calories, values_from = protein) %>% remove_rownames() %>%  column_to_rownames(var = 'item')
 
 view(mFastFoodsnew)
-freq(fastFoodNutrition)
