@@ -10,7 +10,6 @@ BaseOriginal <- copy(food)
 
 # tendência central
 (BaseOriginal$Sweetener <- impute(BaseOriginal$Sweetener, fun = mean))
-(BaseOriginal$Sweetener <- impute(BaseOriginal$Sweetener, fun = median))
 
 # teste se o valor foi imputado
 is.imputed(BaseOriginal$Sweetener)
