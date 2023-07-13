@@ -33,8 +33,8 @@ summary(regrOriginalForw)
 ### comparação dos modelos ###
 # Sumários
 stargazer(regrOriginalBack, regrOriginalForw, regrOriginalBoth, type="text", object.names = TRUE, title="Defesa e Crescimento Economico", single.row=TRUE)
-(plot_summs(regrOriginalBack, regrOriginalForw, regrOriginalBoth, model.names = c("Backward", "Forward", "Both"))
-
+plot_summs(regrOriginalBack, regrOriginalForw, regrOriginalBoth, model.names = c("Backward", "Forward", "Both"))
+  
 # Performance
 test_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth)
 compare_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth, rank = TRUE, verbose = FALSE)
@@ -67,17 +67,17 @@ residualPlots(regrOriginalBoth2)
 
 ### Ausência de normalidade nos resíduos ######
 # Remoção de outliers #
-cooksdRegrOriginal <- cooks.distance(regrOriginalBoth2)
+cooksdRegrOriginal <- cooks.distance(regrOriginalBoth)
 obsInfluentes <- cooksdRegrOriginal[cooksdRegrOriginal > 4*mean(cooksdRegrOriginal, na.rm=T)]
 
 regrOriginal %>% slice(c(as.integer(names(obsInfluentes))))
 
 RegrOriginal2 <- regrOriginal %>% slice(-c(as.integer(names(obsInfluentes))))
 
-regrOriginalBoth3 <- step(lm(PIB.per.capita ~ Arms.Industry..milhoes.US.., data = RegrOriginal2), direction = "both")
-summary(regrOriginalBoth3)
-check_model(regrOriginalBoth3)
-residualPlots(regrOriginalBoth3)
+regrOriginalBoth2 <- step(lm(pib_capita ~ arms_indus, milit_staff, data = RegrOriginal2), direction = "both")
+summary(regrOriginalBoth)
+check_model(regrOriginalBoth)
+residualPlots(regrOriginalBoth)
 
 # Transformação Box-Cox#
 regrOriginalBoxCox <- EnvStats::boxcox(regrOriginalBoth3, optimize = T)
