@@ -1,4 +1,4 @@
-Ano,Military.expenditure,Cooperacao.de.Defesa,Arms.Industry..milhoes.US..,Importacao.de.Armas..Millions.,Exportacao.de.Armas..Millions.,PIB.per.capita,Military.personnel..thousands.
+Ano,milit_expend,coop_def,arms_indus,arms_imp,arms_exp,pib_capita,milit_staff
 2002,"27.343,6",1,2250,129,5802,2.378,988
 2003,"28.670,8",1,3750,127,5139,2.975,961
 2004,"29.967,1",1,3680,6,6253,4.102,999
