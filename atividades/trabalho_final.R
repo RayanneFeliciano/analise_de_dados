@@ -15,11 +15,14 @@ str(regrOriginal)
 regrOriginal$PIB.per.capita <- as.numeric(regrOriginal$PIB.per.capita)
 regrOriginal$Military.expenditure <- as.numeric(regrOriginal$Military.expenditure)
 
+# modificação do nome de algumas colunas
+colnames(regrOriginal)[2:8] <- c('milit_expend', 'coop_def', "arms_indus", 'arms_imp', "arms_exp", 'pib_capta', 'milit_staff')
+
 ##### MODELAGEM #####
 ### criação dos três modelo iniciais, usando step ###
-regrOriginalBack <- step(lm(PIB.per.capita ~ . -Ano, data = regrOriginal), direction = "backward")
-regrOriginalForw <- step(lm(PIB.per.capita ~ . -Ano, data = regrOriginal), direction = "forward")
-regrOriginalBoth <- step(lm(PIB.per.capita ~ . -Ano, data = regrOriginal), direction = "both")
+regrOriginalBack <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "backward")
+regrOriginalForw <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "forward")
+regrOriginalBoth <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "both")
 
 # Verificação das regressões
 summary(regrOriginalBack)
@@ -27,13 +30,13 @@ summary(regrOriginalForw)
 summary(regrOriginalBoth)
 
 # regrOriginalForw possui uma coluna que ficou sem coeficientes definidos na regressão: Retirada dessa variável
-regrOriginalForw <- step(lm(PIB.per.capita ~ Military.expenditure + Arms.Industry..milhoes.US.. + Importacao.de.Armas..Millions. + Exportacao.de.Armas..Millions. + Military.personnel..thousands., data = regrOriginal), direction = "forward")
+regrOriginalForw <- step(lm(pib_capta ~ milit_expend + arms_indus + arms_imp + arms_exp + milit_staff, data = regrOriginal), direction = "forward")
 summary(regrOriginalForw)
 
 ### comparação dos modelos ###
 # Sumários
 stargazer(regrOriginalBack, regrOriginalForw, regrOriginalBoth, type="text", object.names = TRUE, title="Defesa e Crescimento Economico", single.row=TRUE)
-plot_summs(regrOriginalBack, regrOriginalForw, regrOriginalBoth, model.names = c("Backward", "Forward", "Both"))
+(plot_summs(regrOriginalBack, regrOriginalForw, regrOriginalBoth, model.names = c("Backward", "Forward", "Both"))
 
 # Performance
 test_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth)
@@ -85,7 +88,7 @@ regrOriginalBoxCox <- EnvStats::boxcox(regrOriginalBoth3, optimize = T)
 par(mfrow=c(1,2), ask = FALSE)
 qqnorm(resid(regrOriginalBoth3))
 qqline(resid(regrOriginalBoth3))
-plot(enemBoxCox, plot.type = "Q-Q Plots", main = 'Normal Q-Q Plot')
+plot(regrOriginalBoxCox, plot.type = "Q-Q Plots", main = 'Normal Q-Q Plot')
 par(mfrow=c(1,1), ask = FALSE)
 
 lambda <- regrOriginalBoxCox$lambda
