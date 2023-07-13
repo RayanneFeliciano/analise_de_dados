@@ -12,17 +12,14 @@ summary(regrOriginal)
 str(regrOriginal)
 
 # transformação das variáveis que estão como fator em numérica
-regrOriginal$PIB.per.capita <- as.numeric(regrOriginal$PIB.per.capita)
-regrOriginal$Military.expenditure <- as.numeric(regrOriginal$Military.expenditure)
-
-# modificação do nome de algumas colunas
-colnames(regrOriginal)[2:8] <- c('milit_expend', 'coop_def', "arms_indus", 'arms_imp', "arms_exp", 'pib_capta', 'milit_staff')
+regrOriginal$pib_capita <- as.numeric(regrOriginal$pib_capita)
+regrOriginal$milit_expend <- as.numeric(regrOriginal$milit_expend)
 
 ##### MODELAGEM #####
 ### criação dos três modelo iniciais, usando step ###
-regrOriginalBack <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "backward")
-regrOriginalForw <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "forward")
-regrOriginalBoth <- step(lm(pib_capta ~ . -Ano, data = regrOriginal), direction = "both")
+regrOriginalBack <- step(lm(pib_capita ~ . -ano, data = regrOriginal), direction = "backward")
+regrOriginalForw <- step(lm(pib_capita ~ . -ano, data = regrOriginal), direction = "forward")
+regrOriginalBoth <- step(lm(pib_capita ~ . -ano, data = regrOriginal), direction = "both")
 
 # Verificação das regressões
 summary(regrOriginalBack)
@@ -30,7 +27,7 @@ summary(regrOriginalForw)
 summary(regrOriginalBoth)
 
 # regrOriginalForw possui uma coluna que ficou sem coeficientes definidos na regressão: Retirada dessa variável
-regrOriginalForw <- step(lm(pib_capta ~ milit_expend + arms_indus + arms_imp + arms_exp + milit_staff, data = regrOriginal), direction = "forward")
+regrOriginalForw <- step(lm(pib_capita ~ milit_expend + arms_indus + arms_imp + arms_exp + milit_staff, data = regrOriginal), direction = "forward")
 summary(regrOriginalForw)
 
 ### comparação dos modelos ###
