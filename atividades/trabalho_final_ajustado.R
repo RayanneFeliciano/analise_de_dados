@@ -94,7 +94,7 @@ plot(regrOriginalBoth3, which = c(1:4), pch = 20)
 
 # homocedasticidade - Teste Breusch-Pagan
 library(lmtest)
-bptest(regrOriginalBoth)
+bptest(regrOriginalBoth3)
 
 # ausência de autocorrelação dos resíduos: Teste Durbin-watson
 dwtest(regrOriginalBoth3)
