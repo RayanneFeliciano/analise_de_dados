@@ -30,11 +30,19 @@ summary(regrOriginalBoth)
 regrOriginalForw <- step(lm(pib_capita ~ milit_expend + arms_indus + arms_imp + arms_exp + milit_staff, data = regrOriginal), direction = "forward")
 summary(regrOriginalForw)
 
+# obtenção dos coeficientes padronizados
+lm.beta(regrOriginalBoth)
+
 ### comparação dos modelos ###
 # Sumários
 stargazer(regrOriginalBack, regrOriginalForw, regrOriginalBoth, type="text", object.names = TRUE, title="Defesa e Crescimento Economico", single.row=TRUE)
 plot_summs(regrOriginalBack, regrOriginalForw, regrOriginalBoth, model.names = c("Backward", "Forward", "Both"))
-  
+
+# obtenção do IC 95% para os coeficientes
+confint(regrOriginalBack)
+confint(regrOriginalForw)
+confint(regrOriginalBoth)
+
 # Performance
 test_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth)
 compare_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth, rank = TRUE, verbose = FALSE)
@@ -43,21 +51,27 @@ plot(compare_performance(regrOriginalBack, regrOriginalForw, regrOriginalBoth, r
 ### Diagnóstico ###
 # checagem geral #
 check_model(regrOriginalBoth)
+par(mfrow = c(2,2))
+plot(regrOriginalBoth, which = c(1:4), pch = 20)
 
 # testes unitários #
 shapiro.test(residuals(regrOriginalBoth))
 check_heteroscedasticity(regrOriginalBoth)
 check_collinearity(regrOriginalBoth)
 
+# homocedasticidade - Teste Breusch-Pagan
+library(lmtest)
+bptest(regrOriginalBoth)
+
+# ausência de autocorrelação dos resíduos: Teste Durbin-watson
+dwtest(regrOriginalBoth)
+
 # outliers #
 check_outliers(regrOriginalBoth)
 influencePlot(regrOriginalBoth, id.method="identify", main="Observações Influentes", sub="Círculo proporcional à distância de Cook")
 residualPlots(regrOriginalBoth)
 
-par(mfrow = c(2,2))
-plot(regrOriginalBoth, which = c(1:4), pch = 20)
-
-### Remodelagem 1 ###
+### Remodelagem 1: raíz quadrada e exclusão de variável ###
 regrOriginal$milit_staff <- sqrt(regrOriginal$milit_staff)
 regrOriginal <- regrOriginal %>% dplyr::select(-c(milit_staff))
 
@@ -66,31 +80,17 @@ summary(regrOriginalBoth2)
 
 par(ask = FALSE)
 check_model(regrOriginalBoth2)
+check_outliers(regrOriginalBoth2)
 residualPlots(regrOriginalBoth2)
 par(mfrow = c(2,2))
 plot(regrOriginalBoth2, which = c(1:4), pch = 20)
 
-# testes unitários #
-shapiro.test(residuals(regrOriginalBoth2))
-check_heteroscedasticity(regrOriginalBoth2)
-
-### Heterocedasticidade ###
-# Estimativas robustas
-regrOriginalBoth2$robse <- vcovHC(regrOriginalBoth3, type = "HC1")
-coeftest(regrOriginalBoth3, regrOriginalBoth3$robse)
-
-par(ask = FALSE)
-check_model(regrOriginalBoth3)
-residualPlots(regrOriginalBoth3)
-par(mfrow = c(2,2))
-plot(regrOriginalBoth3, which = c(1:4), pch = 20)
-
-# Transformação Box-Cox#
-regrOriginalBoxCox <- EnvStats::boxcox(regrOriginalBoth3, optimize = T)
+# Remodelagem 2: BoxCox #
+regrOriginalBoxCox <- EnvStats::boxcox(regrOriginalBoth2, optimize = T)
 
 par(mfrow=c(1,2), ask = FALSE)
-qqnorm(resid(regrOriginalBoth3))
-qqline(resid(regrOriginalBoth3))
+qqnorm(resid(regrOriginalBoth2))
+qqline(resid(regrOriginalBoth2))
 plot(regrOriginalBoxCox, plot.type = "Q-Q Plots", main = 'Normal Q-Q Plot')
 par(mfrow=c(1,1), ask = FALSE)
 
@@ -99,13 +99,26 @@ lambda
 
 regrOriginalBoxCox <- step(lm((pib_capita^lambda-1)/lambda ~ arms_indus, data = regrOriginal), direction = "both")
 
-summary(regrOriginalBoxCox)
 check_model(regrOriginalBoxCox)
-residualPlots(regrOriginalBoxCox)
 
-shapiro.test(residuals(regrOriginalBoxCox))
-check_heteroscedasticity(regrOriginalBoxCox)
+## checagem diante do novo modelo ##
+# testes unitários #
+shapiro.test(residuals(regrOriginalBoth2))
 
-par(mfrow = c(2,2))
-plot(regrOriginalBoxCox, which = c(1:4), pch = 20)
+# Demais pressupostos
+check_heteroscedasticity(regrOriginalBoth2)
+check_collinearity(regrOriginalBoth2)
+
+# homocedasticidade - Teste Breusch-Pagan
+library(lmtest)
+bptest(regrOriginalBoth2)
+
+# ausência de autocorrelação dos resíduos: Teste Durbin-watson
+dwtest(regrOriginalBoth2)
+durbinWatsonTest(regrOriginalBoth2)
+
+Summary(regrOriginalBoth2)
+
+
+
 
