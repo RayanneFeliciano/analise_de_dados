@@ -54,30 +54,36 @@ check_outliers(regrOriginalBoth)
 influencePlot(regrOriginalBoth, id.method="identify", main="Observações Influentes", sub="Círculo proporcional à distância de Cook")
 residualPlots(regrOriginalBoth)
 
-### Remodelagem 1 ###
-regrOriginal$Military.personnel..thousands. <- sqrt(regrOriginal$Military.personnel..thousands.)
-regrOriginal <- regrOriginal %>% dplyr::select(-c(Military.personnel..thousands.))
+par(mfrow = c(2,2))
+plot(regrOriginalBoth, which = c(1:4), pch = 20)
 
-regrOriginalBoth2 <- step(lm(PIB.per.capita ~ Arms.Industry..milhoes.US.., data = regrOriginal), direction = "both")
+### Remodelagem 1 ###
+regrOriginal$milit_staff <- sqrt(regrOriginal$milit_staff)
+regrOriginal <- regrOriginal %>% dplyr::select(-c(milit_staff))
+
+regrOriginalBoth2 <- step(lm(pib_capita ~ arms_indus, data = regrOriginal), direction = "both")
 summary(regrOriginalBoth2)
 
 par(ask = FALSE)
 check_model(regrOriginalBoth2)
 residualPlots(regrOriginalBoth2)
+par(mfrow = c(2,2))
+plot(regrOriginalBoth2, which = c(1:4), pch = 20)
 
-### Ausência de normalidade nos resíduos ######
-# Remoção de outliers #
-cooksdRegrOriginal <- cooks.distance(regrOriginalBoth)
-obsInfluentes <- cooksdRegrOriginal[cooksdRegrOriginal > 4*mean(cooksdRegrOriginal, na.rm=T)]
+# testes unitários #
+shapiro.test(residuals(regrOriginalBoth2))
+check_heteroscedasticity(regrOriginalBoth2)
 
-regrOriginal %>% slice(c(as.integer(names(obsInfluentes))))
+### Heterocedasticidade ###
+# Estimativas robustas
+regrOriginalBoth2$robse <- vcovHC(regrOriginalBoth3, type = "HC1")
+coeftest(regrOriginalBoth3, regrOriginalBoth3$robse)
 
-RegrOriginal2 <- regrOriginal %>% slice(-c(as.integer(names(obsInfluentes))))
-
-regrOriginalBoth2 <- step(lm(pib_capita ~ arms_indus, milit_staff, data = RegrOriginal2), direction = "both")
-summary(regrOriginalBoth)
-check_model(regrOriginalBoth)
-residualPlots(regrOriginalBoth)
+par(ask = FALSE)
+check_model(regrOriginalBoth3)
+residualPlots(regrOriginalBoth3)
+par(mfrow = c(2,2))
+plot(regrOriginalBoth3, which = c(1:4), pch = 20)
 
 # Transformação Box-Cox#
 regrOriginalBoxCox <- EnvStats::boxcox(regrOriginalBoth3, optimize = T)
@@ -91,52 +97,15 @@ par(mfrow=c(1,1), ask = FALSE)
 lambda <- regrOriginalBoxCox$lambda
 lambda
 
-regrOriginalBoxCox <- step(lm((PIB.per.capita^lambda-1)/lambda ~ Arms.Industry..milhoes.US.., data = RegrOriginal2), direction = "both")
+regrOriginalBoxCox <- step(lm((pib_capita^lambda-1)/lambda ~ arms_indus, data = regrOriginal), direction = "both")
 
 summary(regrOriginalBoxCox)
 check_model(regrOriginalBoxCox)
 residualPlots(regrOriginalBoxCox)
 
-### Heterocedasticidade ###
-# Estimativas robustas
-regrOriginalBoxCox$robse <- vcovHC(regrOriginalBoxCox, type = "HC1")
-coeftest(regrOriginalBoxCox, regrOriginalBoxCox$robse)
+shapiro.test(residuals(regrOriginalBoxCox))
+check_heteroscedasticity(regrOriginalBoxCox)
 
-summary(regrOriginalBoxCox)
-check_model(regrOriginalBoxCox)
-residualPlots(regrOriginalBoxCox)
-
-
-
-## Testes (!!!)
-
-#verificar outliers
-boxplot(RegrOriginal2$Arms.Industry..milhoes.US..)
-boxplot(RegrOriginal2$Military.personnel..thousands.)
-
-x = RegrOriginal2$Arms.Industry..milhoes.US..
-
-q1 = quantile(RegrOriginal2$Arms.Industry..milhoes.US.., 0.25)
-q3 = quantile(RegrOriginal2$Arms.Industry..milhoes.US.., 0.75)
-iq = q3 - q1
-lim_inf = q1 - 1.5*iq
-lim_sup = q3 + 1.5*iq
-
-x > lim_sup
-x < lim_inf
-
-
-View(regrOriginal)
-
-solo.ID <- 1
-solo.atr <- 4
-solo.nome <- 'Arms.Industry..milhoes.US..'
-solo.selecao <- c(solo.ID, solo.atr)
-
-box.out <- boxplot(regrOriginal[,solo.atr], main = paste(solo.nome))$out
-
-hist(regrOriginal[,solo.atr], main = paste(solo.nome))
-
-regrOriginal[regrOriginal[,solo.nome] %in% box.out, solo.selecao]
-
+par(mfrow = c(2,2))
+plot(regrOriginalBoxCox, which = c(1:4), pch = 20)
 
